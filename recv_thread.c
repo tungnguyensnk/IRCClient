@@ -1,6 +1,7 @@
 #include "recv_thread.h"
 
 extern char nick[512];
+
 void *recv_thread(void *arg) {
     int sfd = *(int *) arg;
     char *buffer = malloc(BUF_SIZE);
@@ -10,6 +11,7 @@ void *recv_thread(void *arg) {
         ping_pong(sfd, buffer);
 
         if (strstr(buffer, "Channel :Users Name") != NULL) {
+            system("clear");
             printf("List channel: \n");
             char *tmp = strtok(strdup(buffer), "\r\n");
             int i = 0;
@@ -21,6 +23,11 @@ void *recv_thread(void *arg) {
                 }
                 tmp = strtok(NULL, "\r\n");
             }
+            if (i == 0) {
+                printf("No channel available\n");
+            }
+
+            print_menu();
             continue;
         }
 
@@ -30,9 +37,11 @@ void *recv_thread(void *arg) {
             sscanf(buffer, "%*s %*s %s", channel++);
             char *nick_t = getNick(buffer);
             if (strcmp(nick_t, nick) != 0) {
-                printf("%s join channel %s\n", nick_t, channel);
+                sprintf(buffer, "%s join channel %s", nick_t, channel);
+                print_response(buffer);
             } else {
-                printf("Join channel %s success\n", channel);
+                sprintf(buffer, "Join channel %s success", channel);
+                print_response(buffer);
             }
             continue;
         }
@@ -43,28 +52,30 @@ void *recv_thread(void *arg) {
             sscanf(buffer, "%*s %*s %s", channel++);
             char *nick_t = getNick(buffer);
             if (strcmp(nick_t, nick) != 0) {
-                printf("%s leave channel %s\n", nick_t, channel);
+                sprintf(buffer, "%s leave channel %s", nick_t, channel);
+                print_response(buffer);
             } else {
-                printf("Leave channel %s success\n", channel);
+                sprintf(buffer, "Leave channel %s success", channel);
+                print_response(buffer);
             }
             continue;
         }
 
         // handle leave channel but not join
         if (strcmp(getCodeResponse(buffer), "You're not on that channel") == 0) {
-            printf("You're not on that channel\n");
+            print_response("You're not on that channel");
             continue;
         }
 
         // handle send message to channel but not join
         if (strstr(buffer, "You cannot send external messages") != NULL) {
-            printf("Channel not found\n");
+            print_response("Channel not found");
             continue;
         }
 
         // handle send private message to nick not available
         if (strstr(buffer, "No such nick") != NULL) {
-            printf("Nick not found\n");
+            print_response("Nick not found");
             continue;
         }
 
@@ -74,16 +85,18 @@ void *recv_thread(void *arg) {
             sscanf(buffer, "%*s %*s %s %s", channel, msg++);
             char *nick_t = getNick(buffer);
             if (channel[0] == '#')
-                printf("Message from %s| %s: %s\n", channel, nick_t, msg);
+                sprintf(buffer, "Message from %s| %s: %s", channel, nick_t, msg);
             else
-                printf("Message from %s: %s\n", nick_t, msg);
+                sprintf(buffer, "Message from %s: %s", nick_t, msg);
+            print_response(buffer);
             continue;
         }
 
         // check nick quit
         if (strcmp(getCodeResponse(buffer), "QUIT") == 0) {
             char *nick_t = getNick(buffer);
-            printf("%s quit\n", nick_t);
+            sprintf(buffer, "%s quit", nick_t);
+            print_response(buffer);
             continue;
         }
     }

@@ -4,7 +4,7 @@ int connect_tcp(char *ip, int port) {
     int sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sfd == -1) {
         perror("socket");
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
     struct sockaddr_in addr;
@@ -14,7 +14,7 @@ int connect_tcp(char *ip, int port) {
 
     if (connect(sfd, (struct sockaddr *) &addr, sizeof(addr)) == -1) {
         perror("connect");
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
     return sfd;

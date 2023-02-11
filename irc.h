@@ -7,12 +7,12 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #define PORT 15000
 #define HOST "127.0.0.1"
 #define BUF_SIZE 2048
-#define TIME_OUT 3
+#define TIME_OUT 2
 
 int connect_tcp(char *ip, int port);
 
